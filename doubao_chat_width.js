@@ -6,8 +6,8 @@
 // @author       断弯刀
 // @match        https://www.doubao.com/chat/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=doubao.com
-// @updateURL    https://github.com/duanwandao/tampermonkey-scripts/blob/main/doubao_chat_width.js
-// @downloadURL  https://github.com/duanwandao/tampermonkey-scripts/blob/main/doubao_chat_width.js
+// @updateURL    https://raw.githubusercontent.com/duanwandao/tampermonkey-scripts/refs/heads/main/doubao_chat_width.js
+// @downloadURL  https://raw.githubusercontent.com/duanwandao/tampermonkey-scripts/refs/heads/main/doubao_chat_width.js
 // @grant        none
 // ==/UserScript==
 

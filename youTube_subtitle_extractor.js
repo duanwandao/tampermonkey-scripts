@@ -30,6 +30,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            cursor: move; /* 鼠标指针显示为移动图标 */
         }
         .time-input-container {
             display: flex;
@@ -153,6 +154,9 @@
         document.body.appendChild(selector);
         document.body.appendChild(resultDisplay);
         
+        // 添加拖拽功能
+        makeElementDraggable(selector);
+        
         // 按钮点击事件
         getBtn.addEventListener('click', function() {
             const startTime = startInput.value.trim();
@@ -238,6 +242,67 @@
             setTimeout(() => {
                 resultDisplay.style.display = 'none';
             }, 30000);
+        }
+    }
+    
+    // 使元素可拖拽的函数
+    function makeElementDraggable(element) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        
+        // 鼠标按下事件
+        element.onmousedown = dragStart;
+        
+        // 开始拖拽
+        function dragStart(e) {
+            e.preventDefault();
+            
+            // 获取鼠标位置
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            
+            // 添加鼠标移动和释放事件
+            document.onmousemove = dragElement;
+            document.onmouseup = stopDragging;
+        }
+        
+        // 拖拽元素
+        function dragElement(e) {
+            e.preventDefault();
+            
+            // 计算新位置
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            
+            // 设置新位置
+            element.style.top = (element.offsetTop - pos2) + "px";
+            element.style.left = (element.offsetLeft - pos1) + "px";
+            
+            // 防止拖拽到窗口外
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const elementWidth = element.offsetWidth;
+            const elementHeight = element.offsetHeight;
+            
+            if (element.offsetLeft < 0) {
+                element.style.left = "0px";
+            }
+            if (element.offsetTop < 0) {
+                element.style.top = "0px";
+            }
+            if (element.offsetLeft + elementWidth > windowWidth) {
+                element.style.left = (windowWidth - elementWidth) + "px";
+            }
+            if (element.offsetTop + elementHeight > windowHeight) {
+                element.style.top = (windowHeight - elementHeight) + "px";
+            }
+        }
+        
+        // 停止拖拽
+        function stopDragging() {
+            document.onmousemove = null;
+            document.onmouseup = null;
         }
     }
     

@@ -1,68 +1,73 @@
 // ==UserScript==
 // @name         豆包对话宽度增强
 // @namespace    http://tampermonkey.net/
-// @version      2025-06-12
-// @description  将豆包对话页面的最大宽度从450px增加到900px
+// @version      2025-06-14
+// @description  将豆包对话页面的最大宽度从450px增加到900px，并修改背景色
 // @author       断弯刀
 // @match        https://www.doubao.com/chat/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=doubao.com
-// @updateURL    https://raw.githubusercontent.com/duanwandao/tampermonkey-scripts/refs/heads/main/doubao_chat_width.js
-// @downloadURL  https://raw.githubusercontent.com/duanwandao/tampermonkey-scripts/refs/heads/main/doubao_chat_width.js
+// @updateURL    https://github.com/duanwandao/tampermonkey-scripts/blob/main/doubao_chat_width.js
+// @downloadURL  https://github.com/duanwandao/tampermonkey-scripts/blob/main/doubao_chat_width.js
 // @grant        none
 // ==/UserScript==
 
 (function() {
     'use strict';
 
-    // 定义日志前缀常量
-    const LOG_PREFIX = '【豆包对话宽度增强脚本】';
+    // 配置常量
+    const CONFIG = {
+        LOG_PREFIX: '【豆包对话宽度增强脚本】',
+        TARGET_WIDTH: '900px',
+        TARGET_BG_COLOR: '#eff6ff',
+        SELECTORS: {
+            CONTAINER: '.max-w-450', // 对话容器选择器
+            MESSAGE: '.markdown-body' // 消息内容选择器
+        }
+    };
 
-    // 定义修改元素宽度的函数
-    function modifyElementWidth() {
-        // 查找所有具有max-w-450类的元素
-        const elements = document.querySelectorAll('.max-w-450');
+    // 修改元素样式的函数
+    function modifyElementStyles() {
+        const containers = document.querySelectorAll(CONFIG.SELECTORS.CONTAINER);
+        const messages = document.querySelectorAll(CONFIG.SELECTORS.MESSAGE);
 
-        // 如果找到元素，则修改其max-width属性
-        if (elements.length > 0) {
-            elements.forEach(element => {
-                element.style.maxWidth = '900px';
+        if (containers.length > 0) {
+            containers.forEach(container => {
+                container.style.maxWidth = CONFIG.TARGET_WIDTH;
+                container.style.backgroundColor = CONFIG.TARGET_BG_COLOR;
             });
-            console.log(LOG_PREFIX, '已修改', elements.length, '个元素的最大宽度');
+
+            console.log(CONFIG.LOG_PREFIX, `已修改 ${containers.length} 个容器宽度，${messages.length} 个消息背景色`);
         } else {
-            console.log(LOG_PREFIX, '未找到具有max-w-450类的元素');
+            console.log(CONFIG.LOG_PREFIX, '未找到目标元素');
         }
     }
 
-    // 页面加载完成后立即执行一次
-    window.addEventListener('load', function() {
-        modifyElementWidth();
-        console.log(LOG_PREFIX, '页面加载完成，已执行宽度调整');
+    // 页面加载完成后执行
+    window.addEventListener('load', () => {
+        modifyElementStyles();
+        console.log(CONFIG.LOG_PREFIX, '页面加载完成，已执行样式调整');
     });
 
-    // 创建一个MutationObserver来监听DOM变化
-    const observer = new MutationObserver(function(mutations) {
-        // 检查是否有新元素被添加到DOM中
-        mutations.forEach(function(mutation) {
+    // 监听DOM变化
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
             if (mutation.addedNodes.length > 0) {
-                modifyElementWidth();
-                console.log(LOG_PREFIX, '检测到DOM变化，已执行宽度调整');
+                modifyElementStyles();
+                console.log(CONFIG.LOG_PREFIX, '检测到DOM变化，已执行样式调整');
             }
         });
     });
 
-    // 配置观察器监听整个文档的变化
-    const observerConfig = {
+    // 配置并启动观察器
+    observer.observe(document.body, {
         childList: true,
         subtree: true
-    };
+    });
+    console.log(CONFIG.LOG_PREFIX, '已启动DOM变化监听');
 
-    // 开始观察文档变化
-    observer.observe(document.body, observerConfig);
-    console.log(LOG_PREFIX, '已启动DOM变化监听');
-
-    // 页面URL变化时也执行一次（用于处理单页应用的路由变化）
-    window.addEventListener('popstate', function() {
-        setTimeout(modifyElementWidth, 500);
-        console.log(LOG_PREFIX, '检测到URL变化，已执行宽度调整');
+    // 处理单页应用路由变化
+    window.addEventListener('popstate', () => {
+        setTimeout(modifyElementStyles, 500);
+        console.log(CONFIG.LOG_PREFIX, '检测到URL变化，已执行样式调整');
     });
 })();

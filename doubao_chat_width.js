@@ -18,7 +18,7 @@
     const CONFIG = {
         LOG_PREFIX: '【豆包对话宽度增强脚本】',
         TARGET_WIDTH: '900px',
-        TARGET_BG_COLOR: '#eff6ff',
+        // TARGET_BG_COLOR: '#eff6ff',
         SELECTORS: {
             CONTAINER: '.max-w-450', // 对话容器选择器
             MESSAGE: '.markdown-body' // 消息内容选择器

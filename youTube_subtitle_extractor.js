@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube 字幕时间范围提取工具
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  选择时间范围并获取对应的字幕文本，支持复制到剪贴板
 // @author       Doubao
 // @match        *://www.youtube.com/watch*
@@ -47,7 +47,7 @@
             color: #555;
         }
         .time-input {
-            width: 80px;
+            width: 110px;
             height: 36px;
             padding: 0 10px;
             font-size: 16px;
@@ -112,11 +112,11 @@
         startWrapper.className = 'time-input-wrapper';
         const startLabel = document.createElement('div');
         startLabel.className = 'time-label';
-        startLabel.textContent = '开始时间 (分:秒)';
+        startLabel.textContent = '开始时间 (时:分:秒或分:秒)';
         const startInput = document.createElement('input');
         startInput.className = 'time-input';
         startInput.type = 'text';
-        startInput.placeholder = '0:00';
+        startInput.placeholder = '0:00 或 0:00:00';
         startInput.value = '0:00';
 
         // 结束时间输入
@@ -124,11 +124,11 @@
         endWrapper.className = 'time-input-wrapper';
         const endLabel = document.createElement('div');
         endLabel.className = 'time-label';
-        endLabel.textContent = '结束时间 (分:秒)';
+        endLabel.textContent = '结束时间 (时:分:秒或分:秒)';
         const endInput = document.createElement('input');
         endInput.className = 'time-input';
         endInput.type = 'text';
-        endInput.placeholder = '0:00';
+        endInput.placeholder = '0:00 或 0:00:00';
         endInput.value = getLastTimestamp(); // 默认设置为最后一个时间戳
 
         startWrapper.appendChild(startLabel);
@@ -159,12 +159,17 @@
             const endTime = endInput.value.trim();
 
             if (!isValidTimeFormat(startTime) || !isValidTimeFormat(endTime)) {
-                showResult('请输入有效的时间格式 (例如: 1:30)', false);
+                showResult('请输入有效的时间格式 (例如: 1:30 或 1:01:30)', false);
                 return;
             }
 
             const startTimeSec = timeToSeconds(startTime);
             const endTimeSec = timeToSeconds(endTime);
+
+            if (startTimeSec >= endTimeSec) {
+                showResult('开始时间必须早于结束时间', false);
+                return;
+            }
 
             const segments = document.querySelectorAll('ytd-transcript-segment-renderer');
             let resultText = '';
@@ -241,16 +246,27 @@
         }
     }
 
-    // 验证时间格式 (mm:ss)
+    // 验证时间格式 (支持 hh:mm:ss 和 mm:ss)
     function isValidTimeFormat(timeStr) {
-        const regex = /^(\d+):(\d{2})$/;
+        // 匹配 hh:mm:ss 或 mm:ss 格式
+        const regex = /^(?:(\d+):)?(\d+):(\d{2})$/;
         return regex.test(timeStr);
     }
 
     // 将时间字符串转换为秒数
     function timeToSeconds(timeStr) {
-        const [minutes, seconds] = timeStr.split(':').map(Number);
-        return minutes * 60 + seconds;
+        // 匹配 hh:mm:ss 或 mm:ss 格式
+        const regex = /^(?:(\d+):)?(\d+):(\d{2})$/;
+        const match = timeStr.match(regex);
+        
+        if (!match) return 0;
+        
+        const [, hours, minutes, seconds] = match;
+        
+        // 计算总秒数
+        return (hours ? parseInt(hours, 10) * 3600 : 0) + 
+               parseInt(minutes, 10) * 60 + 
+               parseInt(seconds, 10);
     }
 
     // 获取最后一个时间戳作为默认结束时间
@@ -337,4 +353,4 @@
 
     // 页面加载完成后执行
     waitForSubtitles();
-})();
+})();    
